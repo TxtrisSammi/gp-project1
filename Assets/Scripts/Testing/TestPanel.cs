@@ -22,10 +22,40 @@ public class TestPanel : MonoBehaviour
         // _invoker = FindFirstObjectByType<Invoker>();  // Uncomment after Lecture 5
     }
 
+    private bool _showKeymap = false;
+    private Rect _keymapRect = new Rect(250, 10, 200, 250);
+
+    void Update()
+    {
+        // Event Bus keyboard shortcuts
+        if (Input.GetKeyDown(KeyCode.C))
+            RaceEventBus.Publish(RaceEventType.COUNTDOWN);
+        if (Input.GetKeyDown(KeyCode.S))
+            RaceEventBus.Publish(RaceEventType.STOP);
+        if (Input.GetKeyDown(KeyCode.R))
+            RaceEventBus.Publish(RaceEventType.RESTART);
+        if (Input.GetKeyDown(KeyCode.F))
+            RaceEventBus.Publish(RaceEventType.FINISH);
+        if (Input.GetKeyDown(KeyCode.P))
+            RaceEventBus.Publish(RaceEventType.PAUSE);
+        if (Input.GetKeyDown(KeyCode.Q))
+            RaceEventBus.Publish(RaceEventType.QUIT);
+
+        // Toggle keymap with K key
+        if (Input.GetKeyDown(KeyCode.K))
+            _showKeymap = !_showKeymap;
+    }
+
+
     void OnGUI()
     {
         _windowRect = GUILayout.Window(0, _windowRect,
             DrawWindow, "Test Panel");
+
+        // Show keymap window if enabled
+        if (_showKeymap)
+            _keymapRect = GUILayout.Window(1, _keymapRect,
+                DrawKeymapWindow, "Keyboard Shortcuts");
     }
 
     void DrawWindow(int windowID)
@@ -41,6 +71,10 @@ public class TestPanel : MonoBehaviour
             // DrawCommandSection();  // Uncomment after Lecture 5
             GUILayout.EndScrollView();
         }
+
+        // Add to DrawWindow() after minimize button:
+        if (GUILayout.Button(_showKeymap ? "Hide Keymap (K)" : "Show Keymap (K)"))
+            _showKeymap = !_showKeymap;
 
         GUI.DragWindow(); // Makes window draggable
     }
@@ -85,7 +119,7 @@ public class TestPanel : MonoBehaviour
         }
     }
 
-    // Uncomment after Lecture 5 (Command Pattern) when Invoker class exists:
+    // Uncomment after Lecture 6 (Command Pattern) when Invoker class exists:
     /*
     void DrawCommandSection()
     {
@@ -105,4 +139,22 @@ public class TestPanel : MonoBehaviour
         }
     }
     */
+
+    void DrawKeymapWindow(int windowID)
+    {
+        GUILayout.Label("--- Event Bus ---");
+        GUILayout.Label("C = Countdown");
+        GUILayout.Label("S = Stop");
+        GUILayout.Label("R = Restart");
+        GUILayout.Label("F = Finish");
+        GUILayout.Label("P = Pause");
+        GUILayout.Label("Q = Quit");
+        GUILayout.Space(10);
+        GUILayout.Label("--- General ---");
+        GUILayout.Label("K = Toggle this keymap");
+        GUILayout.Space(10);
+        if (GUILayout.Button("Close"))
+            _showKeymap = false;
+        GUI.DragWindow();
+    }
 }
