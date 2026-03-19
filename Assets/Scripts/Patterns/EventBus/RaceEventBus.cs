@@ -19,7 +19,7 @@ public class RaceEventBus
 {
     // Dictionary mapping event types to UnityEvents
     private static readonly Dictionary<RaceEventType, UnityEvent>
-        _eventDictionary =new Dictionary<RaceEventType, UnityEvent>();
+        _eventDictionary = new Dictionary<RaceEventType, UnityEvent>();
     
         // Subscribe to an event
         public static void Subscribe(RaceEventType eventType, UnityAction listener)

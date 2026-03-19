@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class TestPanel : MonoBehaviour
 {
@@ -10,16 +10,23 @@ public class TestPanel : MonoBehaviour
     // Section expansion state
     private bool _stateExpanded = true;
     private bool _eventBusExpanded = true;
-    // private bool _commandExpanded = true;  // Uncomment after Lecture 5
+    private bool _commandExpanded = true;  // Uncomment after Lecture 5
 
     // Cached component references
     private BikeController _bikeController;
-    // private Invoker _invoker;  // Uncomment after Lecture 5 (Command Pattern)
+    private Invoker _invoker;  // Uncomment after Lecture 5 (Command Pattern)
+    private ICommand TurnLeft, TurnRight;
 
     void Start()
     {
         _bikeController = FindFirstObjectByType<BikeController>();
-        // _invoker = FindFirstObjectByType<Invoker>();  // Uncomment after Lecture 5
+        _invoker = FindFirstObjectByType<Invoker>();  // Uncomment after Lecture 5
+        
+        if (_bikeController != null) 
+        {
+            _turnLeft = new TurnLeft(BikeController);
+            _turnRight = new TurnRight(BikeController);
+        }
     }
 
     private bool _showKeymap = false;
@@ -44,6 +51,20 @@ public class TestPanel : MonoBehaviour
         // Toggle keymap with K key
         if (Input.GetKeyDown(KeyCode.K))
             _showKeymap = !_showKeymap;
+        // Command Pattern Shortcuts
+       if (_invoker != null)
+        {
+            if (Input.GetKeyDown(KeyCode.A))
+                _invoker.ExecuteCommand(_turnLeft);
+            if (Input.GetKeyDown(KeyCode.D))
+                _invoker.ExecuteCommand(_turnRight);
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+                _invoker.StartRecording();
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+                _invoker.StopRecording();
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+                _invoker.StartReplay();
+        } 
     }
 
 
@@ -77,6 +98,7 @@ public class TestPanel : MonoBehaviour
             _showKeymap = !_showKeymap;
 
         GUI.DragWindow(); // Makes window draggable
+        DrawCommandSection();
     }
 
 
@@ -120,7 +142,7 @@ public class TestPanel : MonoBehaviour
     }
 
     // Uncomment after Lecture 6 (Command Pattern) when Invoker class exists:
-    /*
+    
     void DrawCommandSection()
     {
         if (_invoker == null) return;
@@ -138,7 +160,7 @@ public class TestPanel : MonoBehaviour
             GUILayout.EndVertical();
         }
     }
-    */
+    
 
     void DrawKeymapWindow(int windowID)
     {
