@@ -7,6 +7,10 @@ public class TestPanel : MonoBehaviour
     private bool _isMinimized = false;
     private Vector2 _scrollPosition;
 
+    private bool _showKeymap = false;
+    private Rect _keymapRect = new Rect(250, 10, 200, 250);
+
+
     // Section expansion state
     private bool _stateExpanded = true;
     private bool _eventBusExpanded = true;
@@ -19,20 +23,17 @@ public class TestPanel : MonoBehaviour
 
     void Start()
     {
-        _bikeController = FindFirstObjectByType<BikeController>();
+        _bikeController = new BikeController();
         _invoker = FindFirstObjectByType<Invoker>();  // Uncomment after Lecture 5
         
         if (_bikeController != null) 
         {
-            _turnLeft = new TurnLeft(BikeController);
-            _turnRight = new TurnRight(BikeController);
+           // _turnLeft = new TurnLeft(BikeController);
+            // _turnRight = new TurnRight(BikeController);
         }
     }
 
-    private bool _showKeymap = false;
-    private Rect _keymapRect = new Rect(250, 10, 200, 250);
-
-    void Update()
+       void Update()
     {
         // Event Bus keyboard shortcuts
         if (Input.GetKeyDown(KeyCode.C))
@@ -54,10 +55,10 @@ public class TestPanel : MonoBehaviour
         // Command Pattern Shortcuts
        if (_invoker != null)
         {
-            if (Input.GetKeyDown(KeyCode.A))
-                _invoker.ExecuteCommand(_turnLeft);
-            if (Input.GetKeyDown(KeyCode.D))
-                _invoker.ExecuteCommand(_turnRight);
+//            if (Input.GetKeyDown(KeyCode.A))
+//                _invoker.ExecuteCommand(_turnLeft);
+//            if (Input.GetKeyDown(KeyCode.D))
+//                _invoker.ExecuteCommand(_turnRight);
             if (Input.GetKeyDown(KeyCode.Alpha1))
                 _invoker.StartRecording();
             if (Input.GetKeyDown(KeyCode.Alpha2))
@@ -81,6 +82,7 @@ public class TestPanel : MonoBehaviour
 
     void DrawWindow(int windowID)
     {
+   
         if (GUILayout.Button(_isMinimized ? "+" : "-"))
             _isMinimized = !_isMinimized;
 
