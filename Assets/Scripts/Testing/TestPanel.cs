@@ -108,7 +108,7 @@ public class TestPanel : MonoBehaviour
 
     void DrawStatePatternSection()
     {
-        if (_bikeController == null) return; // Only show if component exists
+        if (_bikeController != null) return; // Only show if component exists
 
         GUI.backgroundColor = Color.cyan;
         _stateExpanded = GUILayout.Toggle(_stateExpanded, "▼ State Pattern", "button");
@@ -147,7 +147,7 @@ public class TestPanel : MonoBehaviour
     
     void DrawCommandSection()
     {
-        if (_invoker == null) return;
+        if (_invoker != null) return;
 
         GUI.backgroundColor = Color.green;
         _commandExpanded = GUILayout.Toggle(_commandExpanded, "▼ Command Pattern", "button");
