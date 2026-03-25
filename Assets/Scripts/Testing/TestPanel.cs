@@ -19,17 +19,17 @@ public class TestPanel : MonoBehaviour
     // Cached component references
     private BikeController _bikeController;
     private Invoker _invoker;  // Uncomment after Lecture 5 (Command Pattern)
-    private ICommand TurnLeft, TurnRight;
+    private ICommand _turnLeft, _turnRight;
 
     void Start()
     {
-        _bikeController = new BikeController();
+        _bikeController =  FindFirstObjectByType<BikeController>();
         _invoker = FindFirstObjectByType<Invoker>();  // Uncomment after Lecture 5
         
         if (_bikeController != null) 
         {
-           // _turnLeft = new TurnLeft(BikeController);
-            // _turnRight = new TurnRight(BikeController);
+            _turnLeft = new TurnLeft(_bikeController);
+            _turnRight = new TurnRight(_bikeController);
         }
     }
 
@@ -55,10 +55,10 @@ public class TestPanel : MonoBehaviour
         // Command Pattern Shortcuts
        if (_invoker != null)
         {
-//            if (Input.GetKeyDown(KeyCode.A))
-//                _invoker.ExecuteCommand(_turnLeft);
-//            if (Input.GetKeyDown(KeyCode.D))
-//                _invoker.ExecuteCommand(_turnRight);
+            if (Input.GetKeyDown(KeyCode.A))
+                _invoker.ExecuteCommand(_turnLeft);
+            if (Input.GetKeyDown(KeyCode.D))
+                _invoker.ExecuteCommand(_turnRight);
             if (Input.GetKeyDown(KeyCode.Alpha1))
                 _invoker.StartRecording();
             if (Input.GetKeyDown(KeyCode.Alpha2))
@@ -173,6 +173,13 @@ public class TestPanel : MonoBehaviour
         GUILayout.Label("F = Finish");
         GUILayout.Label("P = Pause");
         GUILayout.Label("Q = Quit");
+        GUILayout.Space(10);
+        GUILayout.Label("--- Command Pattern");
+        GUILayout.Label("A = Turn Left");
+        GUILayout.Label("D = Turn Right");
+        GUILayout.Label("1 = Start Recording");
+        GUILayout.Label("2 = Stop Recording");
+        GUILayout.Label("3 = Play Replay");
         GUILayout.Space(10);
         GUILayout.Label("--- General ---");
         GUILayout.Label("K = Toggle this keymap");
