@@ -15,25 +15,34 @@ public class TestPanel : MonoBehaviour
     private bool _stateExpanded = true;
     private bool _eventBusExpanded = true;
     private bool _commandExpanded = true;  // Uncomment after Lecture 5
+    private bool _poolExpanded = true;
 
     // Cached component references
     private BikeController _bikeController;
     private Invoker _invoker;  // Uncomment after Lecture 5 (Command Pattern)
+    private DroneSpawner _spawner;
+
     private ICommand _turnLeft, _turnRight;
+
+    private bool _autoSpawning = false;
+    private float _spawnInterval = 0.5f;
+    private float _spawnRange = 5f;
+    private float _nextSpawnTime;
 
     void Start()
     {
-        _bikeController =  FindFirstObjectByType<BikeController>();
+        _bikeController = FindFirstObjectByType<BikeController>();
         _invoker = FindFirstObjectByType<Invoker>();  // Uncomment after Lecture 5
-        
-        if (_bikeController != null) 
+        _spawner = FindFirstObjectByType<DroneSpawner>();
+
+        if (_bikeController != null)
         {
             _turnLeft = new TurnLeft(_bikeController);
             _turnRight = new TurnRight(_bikeController);
         }
     }
 
-       void Update()
+    void Update()
     {
         // Event Bus keyboard shortcuts
         if (Input.GetKeyDown(KeyCode.C))
@@ -49,11 +58,29 @@ public class TestPanel : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q))
             RaceEventBus.Publish(RaceEventType.QUIT);
 
+        if (_spawner != null)
+        {
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
+                _spawner.SpawnDrone(pos);
+            }
+            if (Input.GetKeyDown(KeyCode.T))
+                _autoSpawning = !_autoSpawning;            
+            if (_autoSpawning && Time.time > _nextSpawnTime)
+            {
+                Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
+                _spawner.SpawnDrone(pos);
+                _nextSpawnTime = Time.time + _spawnInterval;
+            }
+
+        }
         // Toggle keymap with K key
         if (Input.GetKeyDown(KeyCode.K))
             _showKeymap = !_showKeymap;
+
         // Command Pattern Shortcuts
-       if (_invoker != null)
+        if (_invoker != null)
         {
             if (Input.GetKeyDown(KeyCode.A))
                 _invoker.ExecuteCommand(_turnLeft);
@@ -65,7 +92,7 @@ public class TestPanel : MonoBehaviour
                 _invoker.StopRecording();
             if (Input.GetKeyDown(KeyCode.Alpha3))
                 _invoker.StartReplay();
-        } 
+        }
     }
 
 
@@ -82,7 +109,7 @@ public class TestPanel : MonoBehaviour
 
     void DrawWindow(int windowID)
     {
-   
+
         if (GUILayout.Button(_isMinimized ? "+" : "-"))
             _isMinimized = !_isMinimized;
 
@@ -91,7 +118,8 @@ public class TestPanel : MonoBehaviour
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
             DrawStatePatternSection();
             DrawEventBusSection();
-            // DrawCommandSection();  // Uncomment after Lecture 5
+            DrawCommandSection();  // Uncomment after Lecture 5
+            DrawPoolSection();
             GUILayout.EndScrollView();
         }
 
@@ -100,7 +128,7 @@ public class TestPanel : MonoBehaviour
             _showKeymap = !_showKeymap;
 
         GUI.DragWindow(); // Makes window draggable
-        DrawCommandSection();
+        // DrawCommandSection();
     }
 
 
@@ -108,7 +136,7 @@ public class TestPanel : MonoBehaviour
 
     void DrawStatePatternSection()
     {
-        if (_bikeController != null) return; // Only show if component exists
+        if (_bikeController == null) return; // Only show if component exists
 
         GUI.backgroundColor = Color.cyan;
         _stateExpanded = GUILayout.Toggle(_stateExpanded, "▼ State Pattern", "button");
@@ -144,10 +172,10 @@ public class TestPanel : MonoBehaviour
     }
 
     // Uncomment after Lecture 6 (Command Pattern) when Invoker class exists:
-    
+
     void DrawCommandSection()
     {
-        if (_invoker != null) return;
+        if (_invoker == null) return;
 
         GUI.backgroundColor = Color.green;
         _commandExpanded = GUILayout.Toggle(_commandExpanded, "▼ Command Pattern", "button");
@@ -156,13 +184,25 @@ public class TestPanel : MonoBehaviour
         if (_commandExpanded)
         {
             GUILayout.BeginVertical("box");
-            if (GUILayout.Button("Start Recording")) _invoker.StartRecording();
-            if (GUILayout.Button("Stop Recording")) _invoker.StopRecording();
-            if (GUILayout.Button("Play Replay")) _invoker.StartReplay();
+            if (GUILayout.Button("Turn Left"))
+                _invoker.ExecuteCommand((_turnLeft));
+            if (GUILayout.Button("Turn Right"))
+                _invoker.ExecuteCommand((_turnRight));
+            if (GUILayout.Button("Start Recording"))
+                _invoker.StartRecording();
+            if (GUILayout.Button("Stop Recording"))
+                _invoker.StopRecording();
+            if (GUILayout.Button("Play Replay"))
+                _invoker.StartReplay();
             GUILayout.EndVertical();
         }
     }
     
+    void DrawPoolSection()
+    {
+
+    }
+
 
     void DrawKeymapWindow(int windowID)
     {

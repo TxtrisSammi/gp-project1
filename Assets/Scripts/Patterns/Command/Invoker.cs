@@ -21,6 +21,7 @@ public class Invoker : MonoBehaviour
     {
         _recordedCommands.Clear();
         _isRecording = true;
+        Debug.Log("[Invoker] Started Recording");
     }
 
     public void ExecuteCommand(ICommand command)
@@ -30,11 +31,19 @@ public class Invoker : MonoBehaviour
             _recordedCommands.Add((command, Time.time));
     }
     
+    public void Undo(ICommand command) 
+    {
+        command.Undo();
+        Debug.Log($"[Invoker: {command}] Undo Called");
+    }
+    
     // Continuing Invoker class...
 
     public void StopRecording()
     {
         _isRecording = false;
+        Debug.Log("[Invoker] Stopped Recording");
+
     }
 
     public void StartReplay()
@@ -45,7 +54,7 @@ public class Invoker : MonoBehaviour
         _replayIndex = 0;
         _replayTime = Time.time;
     }
-
+    
     void Update()
     {
         if (_isReplaying && _replayIndex < _recordedCommands.Count)
