@@ -66,7 +66,7 @@ public class TestPanel : MonoBehaviour
                 _spawner.SpawnDrone(pos);
             }
             if (Input.GetKeyDown(KeyCode.T))
-                _autoSpawning = !_autoSpawning;            
+                _autoSpawning = !_autoSpawning;
             if (_autoSpawning && Time.time > _nextSpawnTime)
             {
                 Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
@@ -176,7 +176,6 @@ public class TestPanel : MonoBehaviour
     void DrawCommandSection()
     {
         if (_invoker == null) return;
-
         GUI.backgroundColor = Color.green;
         _commandExpanded = GUILayout.Toggle(_commandExpanded, "▼ Command Pattern", "button");
         GUI.backgroundColor = Color.white;
@@ -197,9 +196,35 @@ public class TestPanel : MonoBehaviour
             GUILayout.EndVertical();
         }
     }
-    
+
     void DrawPoolSection()
     {
+        if (_spawner == null) return;
+        GUI.backgroundColor = Color.cyan;
+        _poolExpanded = GUILayout.Toggle(
+            _poolExpanded, "V Object Pool", "Button");
+        GUI.backgroundColor = Color.white;
+
+        if (_poolExpanded)
+        {
+            GUILayout.BeginVertical("box");
+            if (GUILayout.Button("Spawn Drone (G)"))
+            {
+                Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
+                _spawner.SpawnDrone(pos);
+            }
+            string label = _autoSpawning
+                ? "Stop Auto Spawn (T)"
+                : "Start Auto Spawn (T)";
+            if (GUILayout.Button(label))
+                _autoSpawning = !_autoSpawning;
+
+            GUILayout.Space(5);
+            GUILayout.Label($"Active {_spawner.GetActiveCount()}");
+            GUILayout.Label($"Pooled {_spawner.GetInactiveCount()}");
+            GUILayout.EndVertical();
+        }
+
 
     }
 

@@ -9,6 +9,14 @@ public class Drone : MonoBehaviour
     public void OnSpawn()
     {
         gameObject.SetActive(true);
+        
+        transform.rotation = Quaternion.identity;
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
         Debug.Log("[Drone] Spawned and activated");
     }
 
