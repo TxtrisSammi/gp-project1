@@ -8,7 +8,7 @@ public class BikeController : MonoBehaviour, IBikeElement
     public float turnDistance = 2.0f;
     public Transform StartPOS;
     
-    private List _bikeElements = new List();
+    private List<IBikeElement> _bikeElements = new List<IBikeElement>();
 
     // Current state data
     public float CurrentSpeed { get; set; }
@@ -27,6 +27,11 @@ public class BikeController : MonoBehaviour, IBikeElement
         _startState = gameObject.AddComponent<BikeStartState>();
         _stopState = gameObject.AddComponent<BikeStopState>();
         _turnState = gameObject.AddComponent<BikeTurnState>();
+        
+        _bikeElements.Add(gameObject.AddComponent<BikeShield>());
+        _bikeElements.Add(gameObject.AddComponent<BikeWeapon>());
+        _bikeElements.Add(gameObject.AddComponent<BikeEngine>());
+
 
         _animator = GetComponent<Animator>();
         _bikeStateContext.Transition(_stopState);
