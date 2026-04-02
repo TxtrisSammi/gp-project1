@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class TestPanel : MonoBehaviour
 {
@@ -7,29 +7,109 @@ public class TestPanel : MonoBehaviour
     private bool _isMinimized = false;
     private Vector2 _scrollPosition;
 
+    private bool _showKeymap = false;
+    private Rect _keymapRect = new Rect(250, 10, 200, 250);
+
+
     // Section expansion state
     private bool _stateExpanded = true;
     private bool _eventBusExpanded = true;
-    // private bool _commandExpanded = true;  // Uncomment after Lecture 5
+    private bool _commandExpanded = true;  // Uncomment after Lecture 5
+    private bool _poolExpanded = true;
 
     // Cached component references
     private BikeController _bikeController;
-    // private Invoker _invoker;  // Uncomment after Lecture 5 (Command Pattern)
+    private Invoker _invoker;  // Uncomment after Lecture 5 (Command Pattern)
+    private DroneSpawner _spawner;
+
+    private ICommand _turnLeft, _turnRight;
+
+    private bool _autoSpawning = false;
+    private float _spawnInterval = 0.5f;
+    private float _spawnRange = 5f;
+    private float _nextSpawnTime;
 
     void Start()
     {
         _bikeController = FindFirstObjectByType<BikeController>();
-        // _invoker = FindFirstObjectByType<Invoker>();  // Uncomment after Lecture 5
+        _invoker = FindFirstObjectByType<Invoker>();  // Uncomment after Lecture 5
+        _spawner = FindFirstObjectByType<DroneSpawner>();
+
+        if (_bikeController != null)
+        {
+            _turnLeft = new TurnLeft(_bikeController);
+            _turnRight = new TurnRight(_bikeController);
+        }
     }
+
+    void Update()
+    {
+        // Event Bus keyboard shortcuts
+        if (Input.GetKeyDown(KeyCode.C))
+            RaceEventBus.Publish(RaceEventType.COUNTDOWN);
+        if (Input.GetKeyDown(KeyCode.S))
+            RaceEventBus.Publish(RaceEventType.STOP);
+        if (Input.GetKeyDown(KeyCode.R))
+            RaceEventBus.Publish(RaceEventType.RESTART);
+        if (Input.GetKeyDown(KeyCode.F))
+            RaceEventBus.Publish(RaceEventType.FINISH);
+        if (Input.GetKeyDown(KeyCode.P))
+            RaceEventBus.Publish(RaceEventType.PAUSE);
+        if (Input.GetKeyDown(KeyCode.Q))
+            RaceEventBus.Publish(RaceEventType.QUIT);
+
+        if (_spawner != null)
+        {
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
+                _spawner.SpawnDrone(pos);
+            }
+            if (Input.GetKeyDown(KeyCode.T))
+                _autoSpawning = !_autoSpawning;
+            if (_autoSpawning && Time.time > _nextSpawnTime)
+            {
+                Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
+                _spawner.SpawnDrone(pos);
+                _nextSpawnTime = Time.time + _spawnInterval;
+            }
+
+        }
+        // Toggle keymap with K key
+        if (Input.GetKeyDown(KeyCode.K))
+            _showKeymap = !_showKeymap;
+
+        // Command Pattern Shortcuts
+        if (_invoker != null)
+        {
+            if (Input.GetKeyDown(KeyCode.A))
+                _invoker.ExecuteCommand(_turnLeft);
+            if (Input.GetKeyDown(KeyCode.D))
+                _invoker.ExecuteCommand(_turnRight);
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+                _invoker.StartRecording();
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+                _invoker.StopRecording();
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+                _invoker.StartReplay();
+        }
+    }
+
 
     void OnGUI()
     {
         _windowRect = GUILayout.Window(0, _windowRect,
             DrawWindow, "Test Panel");
+
+        // Show keymap window if enabled
+        if (_showKeymap)
+            _keymapRect = GUILayout.Window(1, _keymapRect,
+                DrawKeymapWindow, "Keyboard Shortcuts");
     }
 
     void DrawWindow(int windowID)
     {
+
         if (GUILayout.Button(_isMinimized ? "+" : "-"))
             _isMinimized = !_isMinimized;
 
@@ -38,11 +118,17 @@ public class TestPanel : MonoBehaviour
             _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
             DrawStatePatternSection();
             DrawEventBusSection();
-            // DrawCommandSection();  // Uncomment after Lecture 5
+            DrawCommandSection();  // Uncomment after Lecture 5
+            DrawPoolSection();
             GUILayout.EndScrollView();
         }
 
+        // Add to DrawWindow() after minimize button:
+        if (GUILayout.Button(_showKeymap ? "Hide Keymap (K)" : "Show Keymap (K)"))
+            _showKeymap = !_showKeymap;
+
         GUI.DragWindow(); // Makes window draggable
+        // DrawCommandSection();
     }
 
 
@@ -85,12 +171,11 @@ public class TestPanel : MonoBehaviour
         }
     }
 
-    // Uncomment after Lecture 5 (Command Pattern) when Invoker class exists:
-    /*
+    // Uncomment after Lecture 6 (Command Pattern) when Invoker class exists:
+
     void DrawCommandSection()
     {
         if (_invoker == null) return;
-
         GUI.backgroundColor = Color.green;
         _commandExpanded = GUILayout.Toggle(_commandExpanded, "▼ Command Pattern", "button");
         GUI.backgroundColor = Color.white;
@@ -98,11 +183,74 @@ public class TestPanel : MonoBehaviour
         if (_commandExpanded)
         {
             GUILayout.BeginVertical("box");
-            if (GUILayout.Button("Start Recording")) _invoker.StartRecording();
-            if (GUILayout.Button("Stop Recording")) _invoker.StopRecording();
-            if (GUILayout.Button("Play Replay")) _invoker.StartReplay();
+            if (GUILayout.Button("Turn Left"))
+                _invoker.ExecuteCommand((_turnLeft));
+            if (GUILayout.Button("Turn Right"))
+                _invoker.ExecuteCommand((_turnRight));
+            if (GUILayout.Button("Start Recording"))
+                _invoker.StartRecording();
+            if (GUILayout.Button("Stop Recording"))
+                _invoker.StopRecording();
+            if (GUILayout.Button("Play Replay"))
+                _invoker.StartReplay();
             GUILayout.EndVertical();
         }
     }
-    */
+
+    void DrawPoolSection()
+    {
+        if (_spawner == null) return;
+        GUI.backgroundColor = Color.cyan;
+        _poolExpanded = GUILayout.Toggle(
+            _poolExpanded, "V Object Pool", "Button");
+        GUI.backgroundColor = Color.white;
+
+        if (_poolExpanded)
+        {
+            GUILayout.BeginVertical("box");
+            if (GUILayout.Button("Spawn Drone (G)"))
+            {
+                Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
+                _spawner.SpawnDrone(pos);
+            }
+            string label = _autoSpawning
+                ? "Stop Auto Spawn (T)"
+                : "Start Auto Spawn (T)";
+            if (GUILayout.Button(label))
+                _autoSpawning = !_autoSpawning;
+
+            GUILayout.Space(5);
+            GUILayout.Label($"Active {_spawner.GetActiveCount()}");
+            GUILayout.Label($"Pooled {_spawner.GetInactiveCount()}");
+            GUILayout.EndVertical();
+        }
+
+
+    }
+
+
+    void DrawKeymapWindow(int windowID)
+    {
+        GUILayout.Label("--- Event Bus ---");
+        GUILayout.Label("C = Countdown");
+        GUILayout.Label("S = Stop");
+        GUILayout.Label("R = Restart");
+        GUILayout.Label("F = Finish");
+        GUILayout.Label("P = Pause");
+        GUILayout.Label("Q = Quit");
+        GUILayout.Space(10);
+        GUILayout.Label("--- Command Pattern");
+        GUILayout.Label("A = Turn Left");
+        GUILayout.Label("D = Turn Right");
+        GUILayout.Label("1 = Start Recording");
+        GUILayout.Label("2 = Stop Recording");
+        GUILayout.Label("3 = Play Replay");
+        GUILayout.Space(10);
+        GUILayout.Label("--- General ---");
+        GUILayout.Label("K = Toggle this keymap");
+        GUILayout.Space(10);
+        if (GUILayout.Button("Close"))
+            _showKeymap = false;
+        GUI.DragWindow();
+    }
 }

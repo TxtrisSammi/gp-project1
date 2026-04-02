@@ -60,12 +60,15 @@
         "*.asset": "yaml",
         "*.meta": "yaml",
         "*.prefab": "yaml",
-        "*.unity": "yaml",
+        "*.unity": "yaml"
     },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "GP Project 1.slnx"
+    "dotnet.defaultSolution": "gp-project1.slnx",
+    "dotrush.roslyn.projectOrSolutionFiles": [
+        "/home/txtrissammi/Desktop/skool/gp/gp-project1/gp-project1.slnx"
+    ]
 }

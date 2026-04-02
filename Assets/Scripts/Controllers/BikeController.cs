@@ -50,8 +50,23 @@ public class BikeController : MonoBehaviour
 
     public void Turn(Direction direction)
     {
-        CurrentTurnDirection = direction;
-        _bikeStateContext.Transition(_turnState);
+// from videos
+        if (direction == Direction.Left)
+        {
+            transform.Translate(Vector3.left * turnDistance);
+            Debug.Log("[BikeController] Turn Left");
+        }
+        else if (direction == Direction.Right)
+        {
+            transform.Translate(Vector3.right * turnDistance);
+            Debug.Log("[BikeController] Turn Right");
+        }
+
+
+
+        // from slides 
+    //    CurrentTurnDirection = direction;
+    //   _bikeStateContext.Transition(_turnState);
     }
     
     // ADD: Subscribe to race events when component is enabled
