@@ -1,12 +1,12 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "PowerUp", menuName = "PowerUp")]
+[CreateAssetMenu(fileName = "Powerup", menuName = "Powerup")]
 
-public class PowerUp :ScriptableObject, IVisitor
+public class Powerup : ScriptableObject, IVisitor
 {
     public string powerName;
     public GameObject powerPrefab;
-    public string powerUpDescription;
+    public string powerupDescription;
 
     [Tooltip("Fully Heal Shield")] public bool healShield;
 
@@ -16,6 +16,9 @@ public class PowerUp :ScriptableObject, IVisitor
 
     [Range(0.0f, 25f)] [Tooltip("Weapon range settings up to 25 units")]
     public int weaponRange;
+    
+    [Range(0.0f, 25f)] [Tooltip("Boost weapon strength up to 50%")]
+    public float weaponStrength;
 
     public void Visit(BikeShield bikeShield)
     {
@@ -56,8 +59,6 @@ public class PowerUp :ScriptableObject, IVisitor
         
         // Respect max
         if (boost >= bikeEngine.maxTurboBoost)
-        {
             bikeEngine.turboBoost = bikeEngine.maxTurboBoost;
-        }
     }
 }

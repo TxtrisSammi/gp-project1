@@ -6,19 +6,37 @@ public class BikeController : MonoBehaviour, IBikeElement
     // Configuration
     public float maxSpeed = 2.0f;
     public float turnDistance = 2.0f;
-    public Transform StartPOS;
+    public Transform startPOS;
     
-    private List<IBikeElement> _bikeElements = new List<IBikeElement>();
+//  private List<IBikeElement> _bikeElements = new List<IBikeElement>();
+    private readonly List<IBikeElement> _bikeElements = new();
 
     // Current state data
     public float CurrentSpeed { get; set; }
     public Direction CurrentTurnDirection { get; private set; }
 
     // State References
-    private IBikeState _startState, _stopState, _turnState;
+    private IBikeState _startState, _stopState, _turnState, _crashState;
     private BikeStateContext _bikeStateContext;
     private Animator _animator;
     private Invoker _invoker;
+    
+    // Observer Events (publishers)
+    public event System.Action<float> OnDamage;
+    public event System.Action OnTurboStart;
+    public event System.Action OnTurboEnd;
+    public event System.Action OnHealthCritical;
+    
+    public int damageCount { get; private set; }
+    public int turboCount { get; private set; }
+    public int criticalCount { get; private set; }
+    
+    // Health State
+    public float health = 100.0f;
+    public float maxHealth = 100.0f;
+    public bool isTurboActive;
+    public bool _criticalTriggered = false;
+
 
     void Start()
     {
@@ -27,6 +45,7 @@ public class BikeController : MonoBehaviour, IBikeElement
         _startState = gameObject.AddComponent<BikeStartState>();
         _stopState = gameObject.AddComponent<BikeStopState>();
         _turnState = gameObject.AddComponent<BikeTurnState>();
+        _crashState = gameObject.AddComponent<BikeCrashState>();
         
         _bikeElements.Add(gameObject.AddComponent<BikeShield>());
         _bikeElements.Add(gameObject.AddComponent<BikeWeapon>());
@@ -38,22 +57,49 @@ public class BikeController : MonoBehaviour, IBikeElement
         _invoker = GetComponent<Invoker>();
     }
 
-    public void StartBike() =>
-        _bikeStateContext.Transition(_startState);
+    // ADD: Subscribe to race events when component is enabled
+    void OnEnable()
+    {
+        RaceEventBus.Subscribe(RaceEventType.START, StartBike);
+        RaceEventBus.Subscribe(RaceEventType.STOP, StopBike);
+        RaceEventBus.Subscribe(RaceEventType.RESTART, RestartBike);
+    }
+    
+    void OnDisable()
+    {
+        RaceEventBus.Unsubscribe(RaceEventType.START, StartBike);
+        RaceEventBus.Unsubscribe(RaceEventType.STOP, StopBike);
+        RaceEventBus.Unsubscribe(RaceEventType.RESTART, RestartBike);
+    }
 
-    public void StopBike() =>
+    public void StartBike() 
+    {
+        _bikeStateContext.Transition(_startState);
+        _animator.SetTrigger("StartMoving");
+    }
+       
+    public void StopBike()
+    {
         _bikeStateContext.Transition(_stopState);
+        _animator.SetTrigger("StopMoving");
+    }
 
     public void RestartBike()
     {
         StopBike();
-        transform.position = Vector3.zero;
-        transform.rotation = Quaternion.identity;
+        transform.position = startPOS.transform.position;
+        transform.rotation = startPOS.transform.rotation;
+    }
+    
+    public void CrashBike()
+    {
+        _bikeStateContext.Transition(_crashState);
+        _animator.SetTrigger("Crash");
     }
 
     public void Turn(Direction direction)
     {
-// from videos
+        // from videos
         if (direction == Direction.Left)
         {
             transform.Translate(Vector3.left * turnDistance);
@@ -64,26 +110,47 @@ public class BikeController : MonoBehaviour, IBikeElement
             transform.Translate(Vector3.right * turnDistance);
             Debug.Log("[BikeController] Turn Right");
         }
-
-
-
-        // from slides 
-    //    CurrentTurnDirection = direction;
-    //   _bikeStateContext.Transition(_turnState);
-    }
+   }
     
-    // ADD: Subscribe to race events when component is enabled
-    void OnEnable()
+    public void TakeDamage(float amount)
     {
-        RaceEventBus.Subscribe(RaceEventType.START, StartBike);
-        RaceEventBus.Subscribe(RaceEventType.STOP, StopBike);
-        RaceEventBus.Subscribe(RaceEventType.RESTART, RestartBike);
+        health -= amount;
+        health = Mathf.Max(health, 0);
+        damageCount ++;
+        OnDamage?.Invoke(amount);
+
+        if (health / maxHealth <= 0.25f && !_criticalTriggered)
+        {
+            _criticalTriggered = true;
+            criticalCount ++;
+            OnHealthCritical!.Invoke();
+        }
     }
     
-    // Your existing StartBike() and StopBike() methods work as is!
-    // They already have the right signature for event handlers
+    public void ActivateTurbo()
+    {
+        if (!isTurboActive)
+        {
+            isTurboActive = true;
+            OnTurboStart?.Invoke();
+        }
+    }
     
+    public void DeactivateTurbo()
+    {
+        if (isTurboActive)
+        {
+            isTurboActive = false;
+            OnTurboEnd?.Invoke();
+        }
+    }
     
-    
-    
+    public void Accept(IVisitor visitor)
+    {
+        // Forward visitor to all bike elements
+        foreach(IBikeElement element in _bikeElements)
+        {
+            element.Accept(visitor);
+        }
+    }
 }

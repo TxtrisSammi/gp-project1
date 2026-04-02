@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 public class TestPanel : MonoBehaviour
@@ -10,12 +11,18 @@ public class TestPanel : MonoBehaviour
     private bool _showKeymap = false;
     private Rect _keymapRect = new Rect(250, 10, 200, 250);
 
+    // Window Enhancments
+    private bool _showTestPanel = true;
+    private bool _isResizing;
+    private Vector2 _minSize = new Vector2(200, 100);
+    private Vector2 _maxSize = new Vector2(400, 800);
 
     // Section expansion state
-    private bool _stateExpanded = true;
+    private bool _stateExpanded = false;
     private bool _eventBusExpanded = true;
-    private bool _commandExpanded = true;  // Uncomment after Lecture 5
+    private bool _commandExpanded = true;
     private bool _poolExpanded = true;
+    private bool _visitorExpanded = true;
 
     // Cached component references
     private BikeController _bikeController;
@@ -28,6 +35,11 @@ public class TestPanel : MonoBehaviour
     private float _spawnInterval = 0.5f;
     private float _spawnRange = 5f;
     private float _nextSpawnTime;
+
+    // Visitor Pattern
+    public Powerup shieldPowerup;
+    public Powerup enginePowerup;
+    public Powerup WeaponPowerup;
 
     void Start()
     {
@@ -44,6 +56,9 @@ public class TestPanel : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.BackQuote))
+            _showTestPanel = !_showTestPanel;
+
         // Event Bus keyboard shortcuts
         if (Input.GetKeyDown(KeyCode.C))
             RaceEventBus.Publish(RaceEventType.COUNTDOWN);
@@ -73,8 +88,28 @@ public class TestPanel : MonoBehaviour
                 _spawner.SpawnDrone(pos);
                 _nextSpawnTime = Time.time + _spawnInterval;
             }
-
         }
+
+        if (_bikeController != null)
+        {
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                _bikeController.Accept(shieldPowerup);
+            }
+
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                _bikeController.Accept(enginePowerup);
+            }
+
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                _bikeController.Accept(WeaponPowerup);
+            }
+        }
+
+
+
         // Toggle keymap with K key
         if (Input.GetKeyDown(KeyCode.K))
             _showKeymap = !_showKeymap;
@@ -98,137 +133,20 @@ public class TestPanel : MonoBehaviour
 
     void OnGUI()
     {
-        _windowRect = GUILayout.Window(0, _windowRect,
-            DrawWindow, "Test Panel");
+        _windowRect = GUILayout.Window(0, _windowRect, DrawWindow, "Test Panel");
+
+        if (_showKeymap)
+            _keymapRect = GUILayout.Window(1, _keymapRect, DrawKeymapWindow, "Keyboard Shortcuts");
+        if (!_showTestPanel) return;
+
+        _windowRect = GUILayout.Window(0, _windowRect, DrawWindow, "Test Panel");
 
         // Show keymap window if enabled
         if (_showKeymap)
             _keymapRect = GUILayout.Window(1, _keymapRect,
                 DrawKeymapWindow, "Keyboard Shortcuts");
     }
-
-    void DrawWindow(int windowID)
-    {
-
-        if (GUILayout.Button(_isMinimized ? "+" : "-"))
-            _isMinimized = !_isMinimized;
-
-        if (!_isMinimized)
-        {
-            _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
-            DrawStatePatternSection();
-            DrawEventBusSection();
-            DrawCommandSection();  // Uncomment after Lecture 5
-            DrawPoolSection();
-            GUILayout.EndScrollView();
-        }
-
-        // Add to DrawWindow() after minimize button:
-        if (GUILayout.Button(_showKeymap ? "Hide Keymap (K)" : "Show Keymap (K)"))
-            _showKeymap = !_showKeymap;
-
-        GUI.DragWindow(); // Makes window draggable
-        // DrawCommandSection();
-    }
-
-
-    // Continuing TestPanel class...
-
-    void DrawStatePatternSection()
-    {
-        if (_bikeController == null) return; // Only show if component exists
-
-        GUI.backgroundColor = Color.cyan;
-        _stateExpanded = GUILayout.Toggle(_stateExpanded, "▼ State Pattern", "button");
-        GUI.backgroundColor = Color.white;
-
-        if (_stateExpanded)
-        {
-            GUILayout.BeginVertical("box");
-            if (GUILayout.Button("Start Bike")) _bikeController.StartBike();
-            if (GUILayout.Button("Stop Bike")) _bikeController.StopBike();
-            if (GUILayout.Button("Turn Left")) _bikeController.Turn(Direction.Left);
-            if (GUILayout.Button("Turn Right")) _bikeController.Turn(Direction.Right);
-            GUILayout.EndVertical();
-        }
-    }
-
-    void DrawEventBusSection()
-    {
-        GUI.backgroundColor = Color.yellow;
-        _eventBusExpanded = GUILayout.Toggle(_eventBusExpanded, "▼ Event Bus", "button");
-        GUI.backgroundColor = Color.white;
-
-        if (_eventBusExpanded)
-        {
-            GUILayout.BeginVertical("box");
-            if (GUILayout.Button("Countdown")) RaceEventBus.Publish(RaceEventType.COUNTDOWN);
-            if (GUILayout.Button("Stop")) RaceEventBus.Publish(RaceEventType.STOP);
-            if (GUILayout.Button("Restart")) RaceEventBus.Publish(RaceEventType.RESTART);
-            if (GUILayout.Button("Finish")) RaceEventBus.Publish(RaceEventType.FINISH);
-            if (GUILayout.Button("Pause")) RaceEventBus.Publish(RaceEventType.PAUSE);
-            GUILayout.EndVertical();
-        }
-    }
-
-    // Uncomment after Lecture 6 (Command Pattern) when Invoker class exists:
-
-    void DrawCommandSection()
-    {
-        if (_invoker == null) return;
-        GUI.backgroundColor = Color.green;
-        _commandExpanded = GUILayout.Toggle(_commandExpanded, "▼ Command Pattern", "button");
-        GUI.backgroundColor = Color.white;
-
-        if (_commandExpanded)
-        {
-            GUILayout.BeginVertical("box");
-            if (GUILayout.Button("Turn Left"))
-                _invoker.ExecuteCommand((_turnLeft));
-            if (GUILayout.Button("Turn Right"))
-                _invoker.ExecuteCommand((_turnRight));
-            if (GUILayout.Button("Start Recording"))
-                _invoker.StartRecording();
-            if (GUILayout.Button("Stop Recording"))
-                _invoker.StopRecording();
-            if (GUILayout.Button("Play Replay"))
-                _invoker.StartReplay();
-            GUILayout.EndVertical();
-        }
-    }
-
-    void DrawPoolSection()
-    {
-        if (_spawner == null) return;
-        GUI.backgroundColor = Color.cyan;
-        _poolExpanded = GUILayout.Toggle(
-            _poolExpanded, "V Object Pool", "Button");
-        GUI.backgroundColor = Color.white;
-
-        if (_poolExpanded)
-        {
-            GUILayout.BeginVertical("box");
-            if (GUILayout.Button("Spawn Drone (G)"))
-            {
-                Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
-                _spawner.SpawnDrone(pos);
-            }
-            string label = _autoSpawning
-                ? "Stop Auto Spawn (T)"
-                : "Start Auto Spawn (T)";
-            if (GUILayout.Button(label))
-                _autoSpawning = !_autoSpawning;
-
-            GUILayout.Space(5);
-            GUILayout.Label($"Active {_spawner.GetActiveCount()}");
-            GUILayout.Label($"Pooled {_spawner.GetInactiveCount()}");
-            GUILayout.EndVertical();
-        }
-
-
-    }
-
-
+    
     void DrawKeymapWindow(int windowID)
     {
         GUILayout.Label("--- Event Bus ---");
@@ -239,6 +157,7 @@ public class TestPanel : MonoBehaviour
         GUILayout.Label("P = Pause");
         GUILayout.Label("Q = Quit");
         GUILayout.Space(10);
+
         GUILayout.Label("--- Command Pattern");
         GUILayout.Label("A = Turn Left");
         GUILayout.Label("D = Turn Right");
@@ -246,6 +165,22 @@ public class TestPanel : MonoBehaviour
         GUILayout.Label("2 = Stop Recording");
         GUILayout.Label("3 = Play Replay");
         GUILayout.Space(10);
+
+        GUILayout.Label("--- Object Pool ---");
+        GUILayout.Label("G = Spawn Drone");
+        GUILayout.Label("T = Toggle Auto-Spawn");
+        GUILayout.Space(10);
+
+        GUILayout.Label("--- Visitor Pattern ---");
+        GUILayout.Label("V = Shield Powerup");
+        GUILayout.Label("E = Engine Powerup");
+        GUILayout.Label("W = Weapon Powerup");
+
+        GUILayout.Label("--- ObserverPattern ---");
+        GUILayout.Label("D = Take Damage");
+        GUILayout.Label("T = Toggle Turbo");
+        GUILayout.Space(10);
+
         GUILayout.Label("--- General ---");
         GUILayout.Label("K = Toggle this keymap");
         GUILayout.Space(10);
@@ -253,4 +188,171 @@ public class TestPanel : MonoBehaviour
             _showKeymap = false;
         GUI.DragWindow();
     }
+
+    void DrawWindow(int windowID)
+    {
+        if (GUILayout.Button(_showKeymap ? "Hide Keymap (K)" : "Show Keymap (K)"))
+            _showKeymap = !_showKeymap;
+        if (GUILayout.Button(_isMinimized ? "+" : "-"))
+            _isMinimized = !_isMinimized;
+
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button(_isMinimized ? "+" : "-", GUILayout.Width(25f)))
+            _isMinimized = !_isMinimized;
+
+        if (GUILayout.Button("X", GUILayout.Width(25)))
+            _showTestPanel = false;
+        GUILayout.EndHorizontal();
+
+        if (!_isMinimized)
+        {
+            _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
+            DrawStatePatternSection();
+            DrawEventBusSection();
+            DrawCommandSection();  // Uncomment after Lecture 5
+            DrawPoolSection();
+            DrawVisitorSection();
+            GUILayout.EndScrollView();
+        }
+
+
+        // Draw Section Methods
+        void DrawStatePatternSection()
+        {
+            if (_bikeController == null) return; // Only show if component exists
+
+            GUI.backgroundColor = Color.cyan;
+            _stateExpanded = GUILayout.Toggle(_stateExpanded, "▼ State Pattern", "button");
+            GUI.backgroundColor = Color.white;
+
+            if (_stateExpanded)
+            {
+                GUILayout.BeginVertical("box");
+                if (GUILayout.Button("Start Bike")) _bikeController.StartBike();
+                if (GUILayout.Button("Stop Bike")) _bikeController.StopBike();
+                if (GUILayout.Button("Turn Left")) _bikeController.Turn(Direction.Left);
+                if (GUILayout.Button("Turn Right")) _bikeController.Turn(Direction.Right);
+                GUILayout.EndVertical();
+            }
+        }
+
+        void DrawEventBusSection()
+        {
+            GUI.backgroundColor = Color.yellow;
+            _eventBusExpanded = GUILayout.Toggle(_eventBusExpanded, "▼ Event Bus", "button");
+            GUI.backgroundColor = Color.white;
+
+            if (_eventBusExpanded)
+            {
+                GUILayout.BeginVertical("box");
+                if (GUILayout.Button("Countdown")) RaceEventBus.Publish(RaceEventType.COUNTDOWN);
+                if (GUILayout.Button("Stop")) RaceEventBus.Publish(RaceEventType.STOP);
+                if (GUILayout.Button("Restart")) RaceEventBus.Publish(RaceEventType.RESTART);
+                if (GUILayout.Button("Finish")) RaceEventBus.Publish(RaceEventType.FINISH);
+                if (GUILayout.Button("Pause")) RaceEventBus.Publish(RaceEventType.PAUSE);
+                GUILayout.EndVertical();
+            }
+        }
+
+        void DrawCommandSection()
+        {
+            if (_invoker == null) return;
+            GUI.backgroundColor = Color.green;
+            _commandExpanded = GUILayout.Toggle(_commandExpanded, "▼ Command Pattern", "button");
+            GUI.backgroundColor = Color.white;
+
+            if (_commandExpanded)
+            {
+                GUILayout.BeginVertical("box");
+                if (GUILayout.Button("Turn Left"))
+                    _invoker.ExecuteCommand((_turnLeft));
+                if (GUILayout.Button("Turn Right"))
+                    _invoker.ExecuteCommand((_turnRight));
+                if (GUILayout.Button("Start Recording"))
+                    _invoker.StartRecording();
+                if (GUILayout.Button("Stop Recording"))
+                    _invoker.StopRecording();
+                if (GUILayout.Button("Play Replay"))
+                    _invoker.StartReplay();
+                GUILayout.EndVertical();
+            }
+        }
+
+        void DrawPoolSection()
+        {
+            if (_spawner == null) return;
+            GUI.backgroundColor = Color.cyan;
+            _poolExpanded = GUILayout.Toggle(
+                _poolExpanded, "V Object Pool", "Button");
+            GUI.backgroundColor = Color.white;
+
+            if (_poolExpanded)
+            {
+                GUILayout.BeginVertical("box");
+                if (GUILayout.Button("Spawn Drone (G)"))
+                {
+                    Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
+                    _spawner.SpawnDrone(pos);
+                }
+                string label = _autoSpawning
+                    ? "Stop Auto Spawn (T)"
+                    : "Start Auto Spawn (T)";
+                if (GUILayout.Button(label))
+                    _autoSpawning = !_autoSpawning;
+
+                GUILayout.Space(5);
+                GUILayout.Label($"Active {_spawner.GetActiveCount()}");
+                GUILayout.Label($"Pooled {_spawner.GetInactiveCount()}");
+                GUILayout.EndVertical();
+            }
+
+
+        }
+
+        void DrawVisitorSection()
+        {
+            if (_bikeController == null) return;
+
+            GUI.backgroundColor = Color.red;
+            _visitorExpanded = GUILayout.Toggle(
+                _visitorExpanded, "V Visitor Pattern", "button");
+            GUI.backgroundColor = Color.white;
+
+            if (_visitorExpanded)
+            {
+                GUILayout.BeginVertical("box");
+                if (GUILayout.Button("Shield Powerup (V)"))
+                    _bikeController.Accept(shieldPowerup);
+                if (GUILayout.Button("Engine Powerup (E)"))
+                    _bikeController.Accept(enginePowerup);
+                if (GUILayout.Button("Weapon Powerup (W)"))
+                    _bikeController.Accept(WeaponPowerup);
+                GUILayout.EndVertical();
+            }
+        }
+        
+        Rect resizeHandle = new Rect(_windowRect.width - 15, _windowRect.height - 15, 15, 15);
+        GUI.DrawTexture(resizeHandle, Texture2D.whiteTexture);
+        EditorGUIUtility.AddCursorRect(
+            resizeHandle,
+            MouseCursor.ResizeUpLeft);
+        if (Event.current.type == EventType.MouseDown && resizeHandle.Contains(Event.current.mousePosition))
+            _isResizing = true;
+
+        if (_isResizing)
+        {
+            _windowRect.width = Mathf.Clamp(Event.current.mousePosition.x, _minSize.x, _maxSize.x);
+            _windowRect.height = Mathf.Clamp(Event.current.mousePosition.y, _minSize.y, _maxSize.y);
+        }
+
+        if (Event.current.type == EventType.MouseUp)
+            {
+                _isResizing = false;
+            }
+
+        GUI.DragWindow(); // Makes window draggable
+    }
+
+
+    
 }

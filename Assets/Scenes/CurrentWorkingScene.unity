@@ -155,6 +155,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BikeController
   maxSpeed: 2
   turnDistance: 2
+  startPOS: {fileID: 0}
+  health: 100
+  maxHealth: 100
+  isTurboActive: 0
+  _criticalTriggered: 0
+--- !u!95 &22353463
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 22353459}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: daf01ed2e956d3549bbff33a1bf16230, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!4 &39570380 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2639911455080084039, guid: 29941f1cf302e7c4fb5a208f889be20e, type: 3}
@@ -320,6 +347,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6b5eb6f352e4503b6d5e58d0a5ad1aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestPanel
+  shieldPowerup: {fileID: 0}
+  enginePowerup: {fileID: 0}
+  WeaponPowerup: {fileID: 0}
 --- !u!4 &369256120 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8433130598519126535, guid: cae49809804330a498981fb4fd11d70e, type: 3}
@@ -405,6 +435,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2198236148893643018, guid: 2ae9caeb76fe54eba8543020027508ce, type: 3}
       insertIndex: -1
       addedObject: {fileID: 22353461}
+    - targetCorrespondingSourceObject: {fileID: 2198236148893643018, guid: 2ae9caeb76fe54eba8543020027508ce, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 22353463}
   m_SourcePrefab: {fileID: 100100000, guid: 2ae9caeb76fe54eba8543020027508ce, type: 3}
 --- !u!4 &961465425 stripped
 Transform:
@@ -501,7 +534,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 1
-  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
+  m_Color: {r: 0.745283, g: 0.745283, b: 0.745283, a: 1}
   m_Intensity: 1.6
   m_Range: 10
   m_SpotAngle: 30
