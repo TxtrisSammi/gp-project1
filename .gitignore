@@ -103,3 +103,6 @@ dotnet-install.sh
 
 # Imports
 Assets/Imports
+
+# Rider
+/.idea
