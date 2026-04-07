@@ -104,5 +104,6 @@ dotnet-install.sh
 # Imports
 Assets/Imports
 
-# Rider
+# IDE 
 /.idea
+/.vscode
