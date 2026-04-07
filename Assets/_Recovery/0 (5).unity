@@ -182,25 +182,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &22353464
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 22353459}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1cc1702b637648f75af4da01b7368cbe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BikeWeapon
-  weaponConfig: {fileID: 11400000, guid: 0df8bb1a9e723cb41bf9ce5b07b13cc8, type: 2}
-  weaponAttachment: {fileID: 11400000, guid: 95fbcbe58f71f785ea2552db51adc4d3, type: 2}
-  secondaryAttachment: {fileID: 0}
-  range: 5
-  maxRange: 25
-  strength: 25
-  maxStrength: 50
 --- !u!4 &39570380 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2639911455080084039, guid: 29941f1cf302e7c4fb5a208f889be20e, type: 3}
@@ -500,9 +481,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2198236148893643018, guid: 2ae9caeb76fe54eba8543020027508ce, type: 3}
       insertIndex: -1
       addedObject: {fileID: 22353463}
-    - targetCorrespondingSourceObject: {fileID: 2198236148893643018, guid: 2ae9caeb76fe54eba8543020027508ce, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 22353464}
   m_SourcePrefab: {fileID: 100100000, guid: 2ae9caeb76fe54eba8543020027508ce, type: 3}
 --- !u!1 &916635677
 GameObject:

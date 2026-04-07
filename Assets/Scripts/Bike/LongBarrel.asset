@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5c50a4099546b7cb1462db52c09824, type: 3}
+  m_Name: LongBarrel
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponAttachment
+  rate: 0
+  range: 50
+  strength: 0
+  cooldown: 0
+  attachmentName: LongBarrel
+  attacmentPrefab: {fileID: 3784215461970189397, guid: 715686c54d468f02aa74f7075e3e430e, type: 3}
+  attacmentDescription: barrel Long

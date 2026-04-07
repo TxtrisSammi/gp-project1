@@ -48,7 +48,7 @@ public class BikeController : MonoBehaviour, IBikeElement
         _crashState = gameObject.AddComponent<BikeCrashState>();
         
         _bikeElements.Add(gameObject.AddComponent<BikeShield>());
-        _bikeElements.Add(gameObject.AddComponent<BikeWeapon>());
+//        _bikeElements.Add(gameObject.AddComponent<BikeWeapon>()); // Commented out so I can add Weapon manually due to null exception
         _bikeElements.Add(gameObject.AddComponent<BikeEngine>());
 
 

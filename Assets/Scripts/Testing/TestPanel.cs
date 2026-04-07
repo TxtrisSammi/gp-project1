@@ -24,7 +24,8 @@ public class TestPanel : MonoBehaviour
     private bool _poolExpanded = false;
     private bool _observerExpanded = false;
     private bool _visitorExpanded = false;
-    private bool _strategyExpanded = true;
+    private bool _strategyExpanded = false;
+    private bool _decoratorExpanded = true;
 
     // Cached component references
     private GameObject _drone;
@@ -33,6 +34,9 @@ public class TestPanel : MonoBehaviour
     private BikeController _bikeController;
     private Invoker _invoker;  // Uncomment after Lecture 5 (Command Pattern)
     private DroneSpawner _spawner;
+    private BikeWeapon _bikeWeapon;
+    
+    private bool _isDecorated;
 
     private ICommand _turnLeft, _turnRight;
     private List<IManeuverBehaviour> _components = new List<IManeuverBehaviour>();
@@ -52,6 +56,7 @@ public class TestPanel : MonoBehaviour
         _bikeController = FindFirstObjectByType<BikeController>();
         _invoker = FindFirstObjectByType<Invoker>();  // Uncomment after Lecture 5
         _spawner = FindFirstObjectByType<DroneSpawner>();
+        _bikeWeapon = FindFirstObjectByType<BikeWeapon>();
 
         if (_bikeController != null)
         {
@@ -147,6 +152,24 @@ public class TestPanel : MonoBehaviour
         // Strategy Pattern
         if (Input.GetKeyDown(KeyCode.G))
             SpawnDrone();
+        
+        if (_bikeWeapon != null)
+        {
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                _bikeWeapon.Decorate();
+                _isDecorated = true;
+            }
+            
+            if (Input.GetKeyDown(KeyCode.N))
+            {
+                _bikeWeapon.Reset();
+                _isDecorated = false;
+            }
+            
+            if (Input.GetKeyDown(KeyCode.D))
+                _bikeWeapon.ToggleFire();
+        }
 
         // Toggle keymap with K key
         if (Input.GetKeyDown(KeyCode.K))
@@ -250,6 +273,7 @@ public class TestPanel : MonoBehaviour
             DrawObserverSection();
             DrawVisitorSection();
             DrawStrategySection();
+            DrawDecoratorSection();
             GUILayout.EndScrollView();
         }
 
@@ -411,6 +435,39 @@ public class TestPanel : MonoBehaviour
                 GUILayout.EndVertical();
             }
         } 
+
+        void DrawDecoratorSection()
+        {
+            if (_bikeWeapon == null) return;
+
+            GUI.backgroundColor = new Color(0.5f, 0f, 0.5f);    
+            _decoratorExpanded = GUILayout.Toggle(_decoratorExpanded, "▼ Decorator Pattern", "button");
+            GUI.backgroundColor = Color.white;
+
+            if (_decoratorExpanded)
+            {
+                GUILayout.BeginVertical("box");
+                if (!_isDecorated)
+                {
+                    if (GUILayout.Button("Decorate (M)"))
+                    {
+                        _bikeWeapon.Decorate();
+                        _isDecorated = true;
+                    }
+                    else
+                    {
+                        if (GUILayout.Button("Reset (N)"))
+                        {
+                            _bikeWeapon.Reset();
+                            _isDecorated = false;
+                        }
+                    }
+                    if (GUILayout.Button("Toggle Fire (B)"))
+                        _bikeWeapon.ToggleFire();
+                    GUILayout.EndVertical();
+                }
+            }
+        }
 
         Rect resizeHandle = new Rect(_windowRect.width - 15, _windowRect.height - 15, 15, 15);
         GUI.DrawTexture(resizeHandle, Texture2D.whiteTexture);

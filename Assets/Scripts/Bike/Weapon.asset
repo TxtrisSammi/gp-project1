@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: Weapon
   m_EditorClassIdentifier: Assembly-CSharp::Powerup
   powerName: Weapon
-  powerPrefab: {fileID: 0}
+  powerPrefab: {fileID: 3784215461970189397, guid: 715686c54d468f02aa74f7075e3e430e, type: 3}
   powerupDescription: Increases Weapon Range & Strength
+  duration: 0
   healShield: 0
   turboBoost: 0
   weaponRange: 12
   weaponStrength: 12
+  armorBoost: 0
