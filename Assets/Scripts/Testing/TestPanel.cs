@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,7 +8,6 @@ public class TestPanel : MonoBehaviour
     private Rect _windowRect = new Rect(10, 10, 220, 400);
     private bool _isMinimized = false;
     private Vector2 _scrollPosition;
-
     private bool _showKeymap = false;
     private Rect _keymapRect = new Rect(250, 10, 200, 250);
 
@@ -19,17 +19,23 @@ public class TestPanel : MonoBehaviour
 
     // Section expansion state
     private bool _stateExpanded = false;
-    private bool _eventBusExpanded = true;
-    private bool _commandExpanded = true;
-    private bool _poolExpanded = true;
-    private bool _visitorExpanded = true;
+    private bool _eventBusExpanded = false;
+    private bool _commandExpanded = false;
+    private bool _poolExpanded = false;
+    private bool _observerExpanded = false;
+    private bool _visitorExpanded = false;
+    private bool _strategyExpanded = true;
 
     // Cached component references
+    private GameObject _drone;
+    public GameObject dronePrefab;
+
     private BikeController _bikeController;
     private Invoker _invoker;  // Uncomment after Lecture 5 (Command Pattern)
     private DroneSpawner _spawner;
 
     private ICommand _turnLeft, _turnRight;
+    private List<IManeuverBehaviour> _components = new List<IManeuverBehaviour>();
 
     private bool _autoSpawning = false;
     private float _spawnInterval = 0.5f;
@@ -80,8 +86,10 @@ public class TestPanel : MonoBehaviour
                 Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
                 _spawner.SpawnDrone(pos);
             }
+
             if (Input.GetKeyDown(KeyCode.T))
                 _autoSpawning = !_autoSpawning;
+
             if (_autoSpawning && Time.time > _nextSpawnTime)
             {
                 Vector3 pos = new Vector3(Random.Range(-_spawnRange, _spawnRange), 0f, Random.Range(-_spawnRange, _spawnRange));
@@ -108,12 +116,6 @@ public class TestPanel : MonoBehaviour
             }
         }
 
-
-
-        // Toggle keymap with K key
-        if (Input.GetKeyDown(KeyCode.K))
-            _showKeymap = !_showKeymap;
-
         // Command Pattern Shortcuts
         if (_invoker != null)
         {
@@ -128,8 +130,28 @@ public class TestPanel : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Alpha3))
                 _invoker.StartReplay();
         }
-    }
 
+        if (_bikeController != null)
+        {
+            if (Input.GetKeyDown(KeyCode.H))
+                _bikeController.TakeDamage(25f);
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                if (_bikeController.isTurboActive)
+                    _bikeController.DeactivateTurbo();
+                else
+                    _bikeController.ActivateTurbo();
+            }
+        }
+        
+        // Strategy Pattern
+        if (Input.GetKeyDown(KeyCode.G))
+            SpawnDrone();
+
+        // Toggle keymap with K key
+        if (Input.GetKeyDown(KeyCode.K))
+            _showKeymap = !_showKeymap;
+    }
 
     void OnGUI()
     {
@@ -146,7 +168,21 @@ public class TestPanel : MonoBehaviour
             _keymapRect = GUILayout.Window(1, _keymapRect,
                 DrawKeymapWindow, "Keyboard Shortcuts");
     }
-    
+
+    private void SpawnDrone()
+    {
+        // From Slides
+        _drone = Instantiate(dronePrefab);
+        // From Video
+//        _drone = GameObject.CreatePrimitive(PrimitiveType.Cube);
+//        _drone.AddComponent<Drone>();
+
+        // In both
+        _drone.transform.position = Random.insideUnitSphere * 10;
+
+        ApplyRandomStrategies();
+    }
+
     void DrawKeymapWindow(int windowID)
     {
         GUILayout.Label("--- Event Bus ---");
@@ -171,15 +207,15 @@ public class TestPanel : MonoBehaviour
         GUILayout.Label("T = Toggle Auto-Spawn");
         GUILayout.Space(10);
 
+        GUILayout.Label("--- ObserverPattern ---");
+        GUILayout.Label("D = Take Damage");
+        GUILayout.Label("B = Toggle Turbo");
+        GUILayout.Space(10);
+
         GUILayout.Label("--- Visitor Pattern ---");
         GUILayout.Label("V = Shield Powerup");
         GUILayout.Label("E = Engine Powerup");
         GUILayout.Label("W = Weapon Powerup");
-
-        GUILayout.Label("--- ObserverPattern ---");
-        GUILayout.Label("D = Take Damage");
-        GUILayout.Label("T = Toggle Turbo");
-        GUILayout.Space(10);
 
         GUILayout.Label("--- General ---");
         GUILayout.Label("K = Toggle this keymap");
@@ -211,7 +247,9 @@ public class TestPanel : MonoBehaviour
             DrawEventBusSection();
             DrawCommandSection();  // Uncomment after Lecture 5
             DrawPoolSection();
+            DrawObserverSection();
             DrawVisitorSection();
+            DrawStrategySection();
             GUILayout.EndScrollView();
         }
 
@@ -283,7 +321,7 @@ public class TestPanel : MonoBehaviour
             if (_spawner == null) return;
             GUI.backgroundColor = Color.cyan;
             _poolExpanded = GUILayout.Toggle(
-                _poolExpanded, "V Object Pool", "Button");
+                _poolExpanded, "▼ Object Pool", "Button");
             GUI.backgroundColor = Color.white;
 
             if (_poolExpanded)
@@ -309,13 +347,40 @@ public class TestPanel : MonoBehaviour
 
         }
 
+        void DrawObserverSection()
+        {
+            if (_bikeController == null) return;
+
+            GUI.backgroundColor = Color.magenta;
+            _observerExpanded = GUILayout.Toggle(
+                _observerExpanded, "▼ Observer Pattern", "button");
+            GUI.backgroundColor = Color.white;
+
+            if (_observerExpanded)
+            {
+                GUILayout.BeginVertical("box");
+                if (GUILayout.Button("Take Damage (H)"))
+                    _bikeController.TakeDamage(25f);
+                if (GUILayout.Button("Toggle Turbo (B)"))
+                {
+                    if (_bikeController.isTurboActive)
+                        _bikeController.DeactivateTurbo();
+                    else
+                        _bikeController.ActivateTurbo();
+                }
+                GUILayout.Label($"Health: {_bikeController.health:F0}");
+                GUILayout.Label($"Turbo: {(_bikeController.isTurboActive ? "ON" : "OFF")}");
+                GUILayout.EndVertical();
+            }
+        }
+
         void DrawVisitorSection()
         {
             if (_bikeController == null) return;
 
             GUI.backgroundColor = Color.red;
             _visitorExpanded = GUILayout.Toggle(
-                _visitorExpanded, "V Visitor Pattern", "button");
+                _visitorExpanded, "▼ Visitor Pattern", "button");
             GUI.backgroundColor = Color.white;
 
             if (_visitorExpanded)
@@ -330,7 +395,23 @@ public class TestPanel : MonoBehaviour
                 GUILayout.EndVertical();
             }
         }
-        
+
+        void DrawStrategySection()
+        {
+            GUI.backgroundColor = new Color(1f, 0.5f, 0f);
+            _strategyExpanded = GUILayout.Toggle(
+                _strategyExpanded, "▼ Strategy Pattern", "button");
+            GUI.backgroundColor = Color.white;
+
+            if (_strategyExpanded)
+            {
+                GUILayout.BeginVertical("box");
+                if (GUILayout.Button("Spawn Drone (G)"))
+                    SpawnDrone();
+                GUILayout.EndVertical();
+            }
+        } 
+
         Rect resizeHandle = new Rect(_windowRect.width - 15, _windowRect.height - 15, 15, 15);
         GUI.DrawTexture(resizeHandle, Texture2D.whiteTexture);
         EditorGUIUtility.AddCursorRect(
@@ -346,13 +427,26 @@ public class TestPanel : MonoBehaviour
         }
 
         if (Event.current.type == EventType.MouseUp)
-            {
-                _isResizing = false;
-            }
+        {
+            _isResizing = false;
+        }
 
         GUI.DragWindow(); // Makes window draggable
     }
 
+    private void ApplyRandomStrategies()
+    {
+        _components.Add(
+            _drone.AddComponent<WeavingManeuver>());
+        _components.Add(
+            _drone.AddComponent<BoppingManeuver>());
+        _components.Add(
+            _drone.AddComponent<FallbackManeuver>());
+        _components.Add(
+            _drone.AddComponent<CirclingManeuver>());
 
-    
+        int index = Random.Range(0, _components.Count);
+
+        _drone.GetComponent<Drone>().ApplyStrategy(_components[index]);
+    }
 }

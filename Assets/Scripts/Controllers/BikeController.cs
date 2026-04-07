@@ -34,8 +34,8 @@ public class BikeController : MonoBehaviour, IBikeElement
     // Health State
     public float health = 100.0f;
     public float maxHealth = 100.0f;
-    public bool isTurboActive;
     public bool _criticalTriggered = false;
+    public bool isTurboActive;
 
 
     void Start()
@@ -132,6 +132,7 @@ public class BikeController : MonoBehaviour, IBikeElement
         if (!isTurboActive)
         {
             isTurboActive = true;
+            turboCount ++;
             OnTurboStart?.Invoke();
         }
     }
