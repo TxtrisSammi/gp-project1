@@ -24,5 +24,7 @@ public class ClientState : MonoBehaviour
 
         if (GUILayout.Button("Stop Bike"))
             _bikeController.StopBike();
+        if (GUILayout.Button("Crash Bike"))
+            _bikeController.CrashBike();
     }
 }

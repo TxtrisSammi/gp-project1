@@ -4,11 +4,12 @@
     public IBikeState CurrentState { get; set; }
 
     // Reference to controller
-    private readonly BikeController
-        _bikeController;
+    private readonly BikeController _bikeController;
 
-    public BikeStateContext(
-        BikeController bikeController)
+    // Keep track of crashes
+    private bool _isCrashed = false;
+    
+    public BikeStateContext(BikeController bikeController)
     {
         _bikeController = bikeController;
     }
@@ -23,6 +24,10 @@
     public void Transition(IBikeState state)
     {
         CurrentState = state;
-        CurrentState.Handle(_bikeController);
+        
+        if (!_isCrashed)
+            CurrentState.Handle(_bikeController);
+        if (CurrentState.IsCrashed())
+            _isCrashed = !_isCrashed;
     }
 }

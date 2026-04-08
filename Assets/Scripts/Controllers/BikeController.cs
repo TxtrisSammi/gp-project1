@@ -99,17 +99,23 @@ public class BikeController : MonoBehaviour, IBikeElement
 
     public void Turn(Direction direction)
     {
+        // State Pattern Implementation
+        CurrentTurnDirection = direction;
+        _bikeStateContext.Transition(_turnState);
+
+
+
         // from videos
-        if (direction == Direction.Left)
-        {
-            transform.Translate(Vector3.left * turnDistance);
-            Debug.Log("[BikeController] Turn Left");
-        }
-        else if (direction == Direction.Right)
-        {
-            transform.Translate(Vector3.right * turnDistance);
-            Debug.Log("[BikeController] Turn Right");
-        }
+        // if (direction == Direction.Left)
+        // {
+            // transform.Rotate(Vector3.down * turnDistance);
+            // Debug.Log("[BikeController] Turn Left");
+        // }
+        // else if (direction == Direction.Right)
+        // {
+            // transform.Rotate(Vector3.up * turnDistance);
+            // Debug.Log("[BikeController] Turn Right");
+        // }
    }
     
     public void TakeDamage(float amount)

@@ -1,13 +1,10 @@
 ﻿using UnityEngine;
 
-public class BikeStopState :
-    MonoBehaviour, IBikeState
+public class BikeStopState : MonoBehaviour, IBikeState
 {
-    private BikeController
-        _bikeController;
+    private BikeController _bikeController;
 
-    public void Handle(
-        BikeController bikeController)
+    public void Handle(BikeController bikeController)
     {
         // Cache reference
         if (!_bikeController)
@@ -17,5 +14,10 @@ public class BikeStopState :
         _bikeController.CurrentSpeed = 0;
 
         Debug.Log("[BikeStopState] Stopped");
+    }
+    
+    public bool IsCrashed()
+    {
+        return false;
     }
 }

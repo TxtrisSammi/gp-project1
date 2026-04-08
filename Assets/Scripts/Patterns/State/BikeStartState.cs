@@ -1,12 +1,10 @@
 ﻿using UnityEngine;
 
-public class BikeStartState :
-    MonoBehaviour, IBikeState
+public class BikeStartState : MonoBehaviour, IBikeState
 {
     private BikeController _bikeController;
 
-    public void Handle(
-        BikeController bikeController)
+    public void Handle(BikeController bikeController)
     {
         if (!_bikeController)
             _bikeController = bikeController;
@@ -23,11 +21,13 @@ public class BikeStartState :
         {
             if (_bikeController.CurrentSpeed > 0)
             {
-                _bikeController.transform.Translate(
-                    Vector3.forward *
-                    (_bikeController.CurrentSpeed *
-                     Time.deltaTime));
+                _bikeController.transform.Translate(Vector3.forward * (_bikeController.CurrentSpeed * Time.deltaTime));
             }
         }
+    }
+
+    public bool IsCrashed()
+    {
+        return false;
     }
 }
