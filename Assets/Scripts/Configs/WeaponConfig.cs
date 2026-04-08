@@ -16,7 +16,7 @@ public class WeaponConfig : ScriptableObject, IWeapon
     
     [Range(0, 5)] [Tooltip("Cooldown Duration")] [SerializeField]
     private float cooldown;
-
+    
     public string WeaponName;
     public GameObject weaponPrefab;
     public string weaponDescription;
