@@ -76,6 +76,7 @@ public class BikeController : MonoBehaviour, IBikeElement
     {
         _bikeStateContext.Transition(_startState);
         _animator.ResetTrigger("StopMoving");
+        _animator.ResetTrigger("Crash");
         _animator.SetTrigger("StartMoving");
     }
        
@@ -83,6 +84,7 @@ public class BikeController : MonoBehaviour, IBikeElement
     {
         _bikeStateContext.Transition(_stopState);
         _animator.ResetTrigger("StartMoving");
+        _animator.ResetTrigger("Crash");
         _animator.SetTrigger("StopMoving");
     }
 
@@ -96,7 +98,9 @@ public class BikeController : MonoBehaviour, IBikeElement
     public void CrashBike()
     {
         _bikeStateContext.Transition(_crashState);
-        _animator.ResetTrigger("Crash");
+        _animator.ResetTrigger("StartMoving");
+        _animator.ResetTrigger("StopMoving");
+        _animator.SetTrigger("Crash");
     }
 
     public void Turn(Direction direction)
