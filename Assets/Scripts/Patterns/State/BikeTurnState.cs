@@ -18,6 +18,7 @@ public class BikeTurnState : MonoBehaviour, IBikeState
         if (_bikeController.CurrentSpeed > 0)
         {
             transform.Translate(_turnDirection * _bikeController.turnDistance);
+            Debug.Log("[BikeTurnState] turned: " + _turnDirection);
         }
     }
 

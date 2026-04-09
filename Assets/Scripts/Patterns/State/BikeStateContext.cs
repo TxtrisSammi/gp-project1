@@ -1,4 +1,6 @@
-﻿public class BikeStateContext
+﻿using UnityEngine;
+
+public class BikeStateContext
 {
     // Current state
     public IBikeState CurrentState { get; set; }
@@ -27,6 +29,8 @@
         
         if (!_isCrashed)
             CurrentState.Handle(_bikeController);
+        else
+            Debug.Log("[BikeStateContext] Cannot Change State, Bike Crashed");
         if (CurrentState.IsCrashed())
             _isCrashed = !_isCrashed;
     }

@@ -10,8 +10,8 @@ public class BikeStartState : MonoBehaviour, IBikeState
             _bikeController = bikeController;
 
         // START: set to max speed
-        _bikeController.CurrentSpeed =
-            _bikeController.maxSpeed;
+        _bikeController.CurrentSpeed = _bikeController.maxSpeed;
+        Debug.Log("[BikeStartState] Bike Started");
     }
 
     void Update()
